@@ -1,0 +1,47 @@
+version: "3.3"
+
+services:
+  homework-backend-db:
+    container_name: homework-backend-db
+    image: postgres
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    env_file:
+      - .dev.env
+
+  homework-redis:
+    container_name: homework-redis
+    image: "redis:alpine"
+
+  homework-backend:
+    container_name: homework-backend
+    build: .
+    image: homework-backend
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./src:/code
+    env_file:
+      - .dev.env
+    ports:
+      - "8000:8000"
+    extra_hosts:
+      host.docker.internal: host-gateway
+    depends_on:
+      - homework-backend-db
+
+  homework-django-q:
+    container_name: homework-django-q
+    build: .
+    image: homework-django-q
+    command: python manage.py qcluster
+    volumes:
+      - ./src:/code
+    env_file:
+      - .dev.env
+    ports:
+      - "8001:8001"
+    extra_hosts:
+      host.docker.internal: host-gateway
+    depends_on:
+      - homework-redis
+      - homework-backend-db

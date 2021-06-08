@@ -1,0 +1,12 @@
+version: "3.3"
+
+services:
+  homework-frontend:
+    container_name: homework-frontend
+    image: homework-frontend
+    build: .
+    volumes:
+      - ./:/home/frontend
+    ports:
+      - "3000:3000"
+    command: "npm run serve -- --port 3000"
